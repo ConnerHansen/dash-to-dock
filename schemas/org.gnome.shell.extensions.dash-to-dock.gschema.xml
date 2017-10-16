@@ -14,6 +14,12 @@
     <value value='1' nick='cycle-windows'/>
     <value value='2' nick='switch-workspace'/>
   </enum>
+  <enum id='org.gnome.shell.extensions.dash-to-dock.animation-type'>
+    <value value='0' nick='bouncy'/>
+    <value value='1' nick='firm'/>
+    <value value='2' nick='snappy'/>
+    <value value='3' nick='soft'/>
+  </enum>
   <!-- this is mean to Match StSide. LEFT and RIGHT actual position in reversed in
        rtl languages -->
   <enum id='org.gnome.shell.extensions.dash-to-dock.position'>
@@ -32,6 +38,11 @@
       <default>'LEFT'</default>
       <summary>Dock position</summary>
       <description>Dock is shown on the Left, Right, Top or Bottom side of the screen.</description>
+    </key>
+    <key name="dock-animation-type" enum="org.gnome.shell.extensions.dash-to-dock.animation-type">
+      <default>'firm'</default>
+      <summary>Dock animation configuration</summary>
+      <description>What style of animation should be used for the dock.</description>
     </key>
     <key type="d" name="animation-time">
       <default>0.2</default>
@@ -67,6 +78,11 @@
       <default>0.8</default>
       <summary>Opacity of the dash background</summary>
       <description>Sets the opacity of the dash background  when in autohide mode.</description>
+    </key>
+    <key type="d" name="dash-icon-scale">
+      <default>1.2</default>
+      <summary>ASdafasd as</summary>
+      <description>ASdpokaspodapsodkasd poakspdoaksdpoaks paisjd.</description>
     </key>
     <key type="b" name="intellihide">
       <default>true</default>

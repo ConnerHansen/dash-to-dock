@@ -31,6 +31,7 @@ const Workspace = imports.ui.workspace;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
+const Animator = Me.imports.animator.Animator;
 const WindowPreview = Me.imports.windowPreview;
 
 let tracker = Shell.WindowTracker.get_default();
@@ -46,6 +47,27 @@ const clickAction = {
     PREVIEWS: 5,
     QUIT: 6
 };
+
+const animConfigs = {
+  bouncy: {
+    easing: "easeOutElastic",
+    timing: 1.6
+  },
+  firm: {
+    easing: "easeOutBounce",
+    timing: 0.3
+  },
+  snappy: {
+    easing: "easeOutQuint",
+    timing: 0.2
+  },
+  soft: {
+    easing: "easeOutBack",
+    timing: 0.4
+  }
+};
+
+const animKeys = Object.keys(animConfigs);
 
 const scrollAction = {
     DO_NOTHING: 0,
@@ -74,6 +96,11 @@ const  BATCH_SIZE_TO_DELETE = 50;
 // The icon size used to extract the dominant color
 const DOMINANT_COLOR_ICON_SIZE = 64;
 
+const DESATURATION_FACTOR = {
+  active: 0.0,
+  hover: 0.5,
+  inactive: 0.8
+};
 /**
  * Extend AppIcon
  *
@@ -101,6 +128,7 @@ var MyAppIcon = new Lang.Class({
         this._nWindows = 0;
 
         this.parent(app, iconParams);
+        this._iconContainer.style_class = this._iconContainer.style_class + " dashtodockIcon";
 
         // Monitor windows-changes instead of app state.
         // Keep using the same Id and function callback (that is extended)
@@ -120,6 +148,19 @@ var MyAppIcon = new Lang.Class({
                                                                  this.onWindowsChanged));
 
         this._dots = null;
+
+        // this._easing = "easeOutExpo";
+        // this._easingTime = 0.2;
+        // this._easing = "easeOutBack";
+        // this._easingTime = 0.4;
+        // this._easing = "easeOutBounce";
+        // this._easingTime = 0.5;
+        // this._easing = "easeOutElastic";
+        // this._easingTime = 1.65;
+        // this._animConfig = animConfigs.snappy;
+        // this._easing = this._animConfig.easing;
+        // this._easingTime = this._animConfig.timing;
+        this._updateAnimConfig();
 
         let keys = ['apply-custom-theme',
                    'custom-theme-running-dots',
@@ -144,10 +185,25 @@ var MyAppIcon = new Lang.Class({
         }));
         this._optionalScrollCycleWindows();
 
+        this._dtdSettings.connect('changed::dash-icon-scale', Lang.bind(this, function() {
+          this._updateBackground(_state || "inactive");
+        }));
+
+        this._dtdSettings.connect('changed::dock-animation-type', Lang.bind(this, function() {
+          this._updateAnimConfig();
+          this._updateBackground(_state || "inactive");
+        }));
+
         this._numberOverlay();
 
         this._previewMenuManager = null;
         this._previewMenu = null;
+        this._gatherColorScheme();
+
+        this._colorDesaturation = new Clutter.DesaturateEffect();
+        this._colorDesaturation.set_factor(DESATURATION_FACTOR.inactive);
+
+        this.icon.actor.add_effect(this._colorDesaturation);
     },
 
     _onDestroy: function() {
@@ -293,9 +349,22 @@ var MyAppIcon = new Lang.Class({
 
         if (applyGlossyBackground) {
             let path = imports.misc.extensionUtils.getCurrentExtension().path;
-            let backgroundStyle = 'background-image: url(\'' + path + '/media/glossy.svg\');' +
-                                  'background-size: contain;'
-            this._iconContainer.get_children()[1].set_style(backgroundStyle)
+            // let backgroundStyle = 'background-image: url(\'' + path + '/media/glossy.svg\');';
+            // let backgroundStyle = 'background-image: url(\'' + path + '/media/glossy.svg\');' +
+            //                       'background-size: contain;'
+            // let backgroundStyle = 'border-radius: 120px;';
+            //   'background-color: rgba(0, 0, 0, 0);' +
+            //   'background-size: contain;';
+            // let backgroundStyle = 'border-radius: 120px;' +
+            //   'background-gradient-direction: radial;' +
+            //   'background-gradient-start: #e0e0e0;' +
+            //   'background-gradient-end: darkgray;' +
+            //   'background-size: contain;';
+            // this._iconContainer.get_children()[1].set_style(backgroundStyle);
+            this._iconContainer.get_children()[1].set_style_class_name("overview-icon whatwhat");
+            // this.icon.actor.set_style_pseudo_class("whatwhat");
+            // this._updateBackground("hover");
+            // this._iconContainer.get_children()[1].set_style(null);
         } else {
             this._iconContainer.get_children()[1].set_style(null);
         }
@@ -331,6 +400,11 @@ var MyAppIcon = new Lang.Class({
         if (this._dots)
             this._dots.destroy()
         this._dots = null;
+    },
+
+    _updateAnimConfig: function() {
+      let key = animKeys[this._dtdSettings.get_enum('dock-animation-type')];
+      this._animConfig = animConfigs[key] || animConfigs["snappy"];
     },
 
     _updateRunningStyle: function() {
@@ -655,44 +729,121 @@ var MyAppIcon = new Lang.Class({
             this._dots.queue_repaint();
     },
 
+    _updateIconSize: function(state) {
+      this.icon.actor.scale_gravity = Clutter.Gravity.SOUTH;
+      if (!this._animConfig)
+        this._animConfig = animConfigs["snappy"];
+
+      if (state == "inactive") {
+        // if (this._originalSize) {
+          let rect = new Meta.Rectangle(),
+            scale = 1.0;
+
+          // [rect.x, rect.y] = this.actor.get_transformed_position();
+          // [rect.width, rect.height] = this.actor.get_transformed_size();
+          // scale = this._originalSize / rect.width;
+
+          Tweener.addTween(this.icon.actor, {
+            translation_x: 0,
+            translation_y: 0,
+            scale_x: 1.0,
+            scale_y: 1.0,
+            time: this._animConfig.timing,
+            transition: this._animConfig.easing,
+          });
+        // }
+      } else if (state == "active") {
+        let scale = this._dtdSettings.get_double('dash-icon-scale'),
+          offset = 0,
+          rect = new Meta.Rectangle();
+
+        [rect.x, rect.y] = this.actor.get_transformed_position();
+        [rect.width, rect.height] = this.actor.get_transformed_size();
+        this._originalSize = rect.width;
+
+        offset = ((this._originalSize * scale) - this._originalSize) / 2;
+        Tweener.addTween(this.icon.actor, {
+          translation_y: -offset / 2,
+          scale_x: scale,
+          scale_y: scale,
+          time: this._animConfig.timing,
+          transition: this._animConfig.easing,
+        });
+      } else if (state == "hover" && this._state != "active") {
+        let iconScale = this._dtdSettings.get_double('dash-icon-scale'),
+          scale = 1 + (0.75 * (iconScale - 1)),
+          offset = 0,
+          rect = new Meta.Rectangle();
+
+        [rect.x, rect.y] = this.actor.get_transformed_position();
+        [rect.width, rect.height] = this.actor.get_transformed_size();
+        this._originalSize = rect.width;
+
+        offset = ((this._originalSize * scale) - this._originalSize) / 2;
+        Tweener.addTween(this.icon.actor, {
+          // translation_x: -offset,
+          translation_y: -offset / 2,
+          scale_x: scale,
+          scale_y: scale,
+          time: this._animConfig.timing,
+          transition: this._animConfig.easing,
+        });
+      }
+    },
+
+    _updateBackground: function(state) {
+      let bgStyle = "flat";
+
+      if (!this._state)
+        this._state = "inactive";
+
+      if (state === "active")
+        this._state = "active";
+      else if (state === "inactive")
+        this._state = "inactive";
+
+      Animator.updateIconBackground(this, state, bgStyle)
+    },
+
+    _gatherColorScheme: function() {
+      let colorPallete = this._calculateColorPalette();
+
+      if (colorPallete === null)
+        return;
+
+      this.colorScheme = {
+        lighter: colorPallete.lighter.r + "," + colorPallete.lighter.g + "," + colorPallete.lighter.b,
+        original: colorPallete.original.r + "," + colorPallete.original.g + "," + colorPallete.original.b,
+        darker: colorPallete.darker.r + "," + colorPallete.darker.g + "," + colorPallete.darker.b
+      };
+    },
+
     _enableBacklight: function() {
-        let colorPallete = this._calculateColorPalette();
-
         // Fallback
-        if (colorPallete === null) {
-            this._iconContainer.set_style(
-                'border-radius: 5px;' +
-                'background-gradient-direction: vertical;' +
-                'background-gradient-start: #e0e0e0;' +
-                'background-gradient-end: darkgray;'
-            );
+        if (!this.colorScheme) {
+            this._gatherColorScheme();
 
-            this._dot.set_style(
-                'height: 0px;' +
-                'border: 0px solid white;' +
-                'background-color: gray;'
-            );
-
-            return;
+            if (!this.colorScheme) {
+              this.colorScheme = {
+                lighter: "255,255,255",
+                original: "200,200,200",
+                darker: "150,150,150"
+              }
+          }
         }
 
-        this._iconContainer.set_style(
-            'border-radius: 5px;' +
-            'background-gradient-direction: vertical;' +
-            'background-gradient-start: ' + colorPallete.original + ';' +
-            'background-gradient-end: ' +  colorPallete.darker + ';'
-        );
-
-        this._dot.set_style(
-            'height: 0px;' +
-            'border: 0px solid ' + colorPallete.lighter  + ';' +
-            'background-color: ' + colorPallete.darker + ';'
-        );
+        if (this.colorScheme) {
+          this._updateBackground("active");
+        }
     },
 
     _disableBacklight: function() {
-        this._iconContainer.set_style(null);
-        this._dot.set_style(null);
+        if (this.colorScheme)
+          this._updateBackground("inactive");
+        else {
+          this._iconContainer.set_style(null);
+          this._dot.set_style(null);
+        }
     },
 
     /**
@@ -810,10 +961,15 @@ var MyAppIcon = new Lang.Class({
 
         // Cache the result.
         let backgroundColor = {
-            lighter:  Utils.ColorUtils.ColorLuminance(rgb.r, rgb.g, rgb.b, 0.2),
-            original: Utils.ColorUtils.ColorLuminance(rgb.r, rgb.g, rgb.b, 0),
-            darker:   Utils.ColorUtils.ColorLuminance(rgb.r, rgb.g, rgb.b, -0.5)
+            lighter:  Utils.ColorUtils.ColorLuminanceRGB(rgb.r, rgb.g, rgb.b, 0.2),
+            original: Utils.ColorUtils.ColorLuminanceRGB(rgb.r, rgb.g, rgb.b, -0.2),
+            darker:   Utils.ColorUtils.ColorLuminanceRGB(rgb.r, rgb.g, rgb.b, -0.5)
         };
+        // let backgroundColor = {
+        //   lighter: rgb,
+        //   original: rgb,
+        //   darker: rgb
+        // };
 
         if (iconCacheMap.size >= MAX_CACHED_ITEMS) {
             //delete oldest cached values (which are in order of insertions)

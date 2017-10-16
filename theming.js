@@ -180,7 +180,7 @@ var ThemeManager = new Lang.Class({
         if (!this._settings.get_boolean('apply-custom-theme')) {
             if (this._settings.get_boolean('force-straight-corner'))
                 this._actor.add_style_class_name('straight-corner');
-            else 
+            else
                 this._actor.remove_style_class_name('straight-corner');
         } else {
             this._actor.remove_style_class_name('straight-corner');

@@ -473,13 +473,18 @@ var MyDash = new Lang.Class({
 
         appIcon.actor.connect('notify::hover', Lang.bind(this, function() {
             if (appIcon.actor.hover) {
+              appIcon._updateBackground("hover");
                 this._ensureAppIconVisibilityTimeoutId = Mainloop.timeout_add(100, Lang.bind(this, function() {
                     ensureActorVisibleInScrollView(this._scrollView, appIcon.actor);
                     this._ensureAppIconVisibilityTimeoutId = 0;
                     return GLib.SOURCE_REMOVE;
                 }));
-            }
-            else {
+            } else {
+              if (appIcon._state === "active")
+                appIcon._updateBackground("active");
+              else
+                appIcon._updateBackground("inactive");
+
                 if (this._ensureAppIconVisibilityTimeoutId > 0) {
                     Mainloop.source_remove(this._ensureAppIconVisibilityTimeoutId);
                     this._ensureAppIconVisibilityTimeoutId = 0;

@@ -98,6 +98,7 @@ const Settings = new Lang.Class({
     },
 
     _bindSettings: function() {
+      global.log("**** BIND SETTINGS!");
         // Position and size panel
 
         // Monitor options
@@ -276,6 +277,8 @@ const Settings = new Lang.Class({
             dialog.show_all();
 
         }));
+
+        global.log("* * * *A*SD*AS* DA*S DA*SD *AS D*");
 
         // size options
         this._builder.get_object('dock_size_scale').set_value(this._settings.get_double('height-fraction'));
@@ -587,6 +590,14 @@ const Settings = new Lang.Class({
         this._builder.get_object('custom_opacity_scale').set_value(this._settings.get_double('background-opacity'));
         this._settings.bind('opaque-background', this._builder.get_object('custom_opacity'), 'sensitive', Gio.SettingsBindFlags.DEFAULT);
 
+        // Setup my new settings. This method needs to be broken up because it's impossible to find freaking anything
+        this._builder.get_object('custom_icon_scale').set_value(this._settings.get_double('dash-icon-scale'));
+
+        this._builder.get_object('animation_type_combo').set_active(this._settings.get_enum('dock-animation-type'));
+        this._builder.get_object('animation_type_combo').connect('changed', Lang.bind (this, function(widget) {
+            this._settings.set_enum('dock-animation-type', widget.get_active());
+        }));
+
         this._settings.bind('unity-backlit-items',
             this._builder.get_object('unity_backlit_items_switch'),
             'active', Gio.SettingsBindFlags.DEFAULT
@@ -679,6 +690,18 @@ const Settings = new Lang.Class({
 
         custom_opacity_scale_format_value_cb: function(scale, value) {
             return Math.round(value*100) + ' %';
+        },
+
+        custom_icon_scale_value_changed_cb: function(scale) {
+            // Avoid settings the opacity consinuosly as it's change is animated
+            if (this.dash_icon_scale > 0)
+                Mainloop.source_remove(this.dash_icon_scale);
+
+            this.dash_icon_scale = Mainloop.timeout_add(SCALE_UPDATE_TIMEOUT, Lang.bind(this, function() {
+                this._settings.set_double('dash-icon-scale', scale.get_value());
+                this.dash_icon_scale = scale.get_value();
+                return GLib.SOURCE_REMOVE;
+            }));
         },
 
         all_windows_radio_button_toggled_cb: function(button) {

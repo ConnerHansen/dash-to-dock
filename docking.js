@@ -729,11 +729,18 @@ const DockedDash = new Lang.Class({
     _animateIn: function(time, delay) {
         this._dockState = State.SHOWING;
 
+        // Tweener.addTween(this.actor, {
+        //   opacity: 255,
+        //   time: time,
+        //   delay: delay,
+        //   transition: 'easeInOutExpo'
+        // });
+
         Tweener.addTween(this._slider, {
             slidex: 1,
             time: time,
             delay: delay,
-            transition: 'easeOutQuad',
+            transition: 'easeInOutExpo',
             onComplete: Lang.bind(this, function() {
                 this._dockState = State.SHOWN;
                 // Remove barrier so that mouse pointer is released and can access monitors on other side of dock
@@ -748,11 +755,19 @@ const DockedDash = new Lang.Class({
 
     _animateOut: function(time, delay) {
         this._dockState = State.HIDING;
+
+        // Tweener.addTween(this.actor, {
+        //   opacity: 100,
+        //   time: time,
+        //   delay: delay,
+        //   transition: 'easeInExpo'
+        // });
+
         Tweener.addTween(this._slider, {
             slidex: 0,
             time: time,
             delay: delay ,
-            transition: 'easeOutQuad',
+            transition: 'easeInExpo',
             onComplete: Lang.bind(this, function() {
                 this._dockState = State.HIDDEN;
                 this._updateBarrier();

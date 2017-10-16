@@ -100,6 +100,17 @@ var ColorUtils = {
         return rgbString;
     },
 
+    // Darken or brigthen color by a fraction dlum
+    // Each rgb value is modified by the same fraction.
+    // Return rgb hash
+    ColorLuminanceRGB: function(r, g, b, dlum) {
+        return {
+          r: Math.round(Math.min(Math.max(r*(1+dlum), 0), 255)),
+          g: Math.round(Math.min(Math.max(g*(1+dlum), 0), 255)),
+          b: Math.round(Math.min(Math.max(b*(1+dlum), 0), 255))
+        };
+    },
+
     // Convert hsv ([0-1, 0-1, 0-1]) to rgb ([0-255, 0-255, 0-255]).
     // Following algorithm in https://en.wikipedia.org/wiki/HSL_and_HSV
     // here with h = [0,1] instead of [0, 360]
