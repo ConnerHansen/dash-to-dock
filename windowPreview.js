@@ -592,4 +592,3 @@ const WindowPreviewMenuItem = new Lang.Class({
     }
 
 });
-

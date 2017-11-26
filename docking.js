@@ -273,6 +273,65 @@ const DockedDash = new Lang.Class({
         });
         this._box.connect('notify::hover', Lang.bind(this, this._hoverChanged));
 
+        // prototype icon scaling based on pointer position but seems like
+        // it might be kind of a performance hog
+        // this._box.connect('motion-event', Lang.bind(this, function(src, evnt) {
+        //   let point = new Clutter.Point(),
+        //     baseX = this.staticBox.x1,
+        //     baseY = this.staticBox.y1,
+        //     width = this.staticBox.x2 - baseX,
+        //     height = this.staticBox.y2 - baseY;
+        //
+        //   evnt.get_position(point);
+        //   let offsetX = point.x - baseX,
+        //     offsetY = baseY - point.y,
+        //     scaleX = offsetX / width,
+        //     scaleY = offsetY / height,
+        //     apps = this.dash._getAppIcons(),
+        //     stepSize = (1.0 * width) / (apps.length + 1),
+        //     step = 0;
+        //
+        //
+        //   apps.forEach(function(app) {
+        //     let center = step + stepSize/2.0,
+        //       distance = Math.abs(offsetX - center),
+        //       proportionalDistance = distance / width,
+        //       augmentor = 0.8,
+        //       scale = 1.0 - augmentor * proportionalDistance;
+        //
+        //     if (proportionalDistance < 0.5)
+        //       app._iconContainer.set_scale_with_gravity(scale, scale, Clutter.Gravity.SOUTH);
+        //     // else
+        //     //   if (app._iconContainer.scale_x != 0.8)
+        //     //     app._iconContainer.set_scale_with_gravity(0.8, 0.8, Clutter.Gravity.SOUTH);
+        //
+        //     step += stepSize;
+        //   });
+        //
+        //   return Clutter.EVENT_STOP;
+        // }));
+
+        // this._box.connect('leave-event', Lang.bind(this, function() {
+        //   let apps = this.dash._getAppIcons();
+        //
+        //   // app._iconContainer.set_scale_with_gravity(scale, scale, Clutter.Gravity.SOUTH);
+        //   this._mouse_event_scale = 1.0;
+        //   Tweener.addTween(this, {
+        //     time: 0.5,
+        //     easing: 'easeOutExpo',
+        //     _mouse_event_scale: 0.0,
+        //     onUpdate: function() {
+        //       global.log(this._mouse_event_scale);
+        //       apps.forEach(function(app) {
+        //         let augmentor = 0.4,
+        //         scale = 1.0 - augmentor * this._mouse_event_scale;
+        //
+        //         app._iconContainer.set_scale_with_gravity(scale, scale, Clutter.Gravity.SOUTH);
+        //       });
+        //     }
+        //   });
+        // }));
+
         // Create and apply height constraint to the dash. It's controlled by this.actor height
         this.constrainSize = new Clutter.BindConstraint({
             source: this.actor,
@@ -694,6 +753,30 @@ const DockedDash = new Lang.Class({
                     this._hide();
             }
         }
+
+        // if (this._box.hover) {
+        //
+        // } else {
+        //     let apps = this.dash._getAppIcons();
+        //
+        //     // app._iconContainer.set_scale_with_gravity(scale, scale, Clutter.Gravity.SOUTH);
+        //     this._mouse_event_scale = 0.0;
+        //     Tweener.addTween(this, {
+        //       time: 0.2,
+        //       ease: 'easeOutQuad',
+        //       _mouse_event_scale: 0.6,
+        //       onUpdate: function() {
+        //         let src = this;
+        //         apps.forEach(function(app) {
+        //           let augmentor = 0.4,
+        //           scale = 1.0 - src._mouse_event_scale;
+        //
+        //           global.log(scale);
+        //           app._iconContainer.set_scale_with_gravity(scale, scale, Clutter.Gravity.SOUTH);
+        //         });
+        //       }
+        //     })
+        // }
     },
 
     _show: function() {
