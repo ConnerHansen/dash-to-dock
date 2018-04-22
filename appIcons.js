@@ -32,6 +32,7 @@ const Workspace = imports.ui.workspace;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const Animator = Me.imports.animator.Animator;
+const AnimatorConst = Me.imports.animator.AnimatorConst;
 const WindowPreview = Me.imports.windowPreview;
 
 let tracker = Shell.WindowTracker.get_default();
@@ -96,11 +97,6 @@ const  BATCH_SIZE_TO_DELETE = 50;
 // The icon size used to extract the dominant color
 const DOMINANT_COLOR_ICON_SIZE = 64;
 
-const DESATURATION_FACTOR = {
-  active: 0.0,
-  hover: 0.5,
-  inactive: 0.8
-};
 /**
  * Extend AppIcon
  *
@@ -195,12 +191,12 @@ var MyAppIcon = new Lang.Class({
         this._optionalScrollCycleWindows();
 
         this._dtdSettings.connect('changed::dash-icon-scale', Lang.bind(this, function() {
-          this._updateBackground(_state || "inactive");
+          this._updateBackground(this._state || "inactive");
         }));
 
         this._dtdSettings.connect('changed::dock-animation-type', Lang.bind(this, function() {
           this._updateAnimConfig();
-          this._updateBackground(_state || "inactive");
+          this._updateBackground(this._state || "inactive");
         }));
 
         this._numberOverlay();
@@ -210,9 +206,27 @@ var MyAppIcon = new Lang.Class({
         this._gatherColorScheme();
 
         this._colorDesaturation = new Clutter.DesaturateEffect();
-        this._colorDesaturation.set_factor(DESATURATION_FACTOR.inactive);
+        this._colorDesaturation.set_factor(AnimatorConst.desaturation.inactive);
 
-        this.icon.actor.add_effect(this._colorDesaturation);
+        // this.icon.actor.add_effect(this._colorDesaturation);
+        this._iconContainer.add_effect(this._colorDesaturation);
+        // this._iconContainer.connect('enter-event', Lang.bind(this, this._onMove));
+
+
+    },
+
+    _onMove: function(actor, evt, data) {
+      global.log(actor);
+      global.log(evt);
+      global.log(data);
+
+      let keys = Object.keys(evt);
+
+      keys.forEach(function(key) {
+        global.log(key);
+      });
+
+      return Clutter.EVENT_PROPAGATE;
     },
 
     _onDestroy: function() {

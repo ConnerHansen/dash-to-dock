@@ -22,7 +22,7 @@ const animConfigs = {
     timing: 0.4
   }
 };
-global.log("*********************");
+
 const animKeys = Object.keys(animConfigs);
 
 const DESATURATION_FACTOR = {
@@ -31,10 +31,23 @@ const DESATURATION_FACTOR = {
   inactive: 0.8
 };
 
+var AnimatorConst = {
+  desaturation: {
+    active: 0.0,
+    hover: 0.5,
+    inactive: 0.8
+  }
+}
+
 /**
  * Animator contains the core animation components
  */
 var Animator = {
+  DESATURATION_FACTOR: {
+    active: 0.0,
+    hover: 0.5,
+    inactive: 0.8
+  },
 
   /**
    * _getIconScaleOffset gets the scaled difference in pixels between an icon and
@@ -59,6 +72,7 @@ var Animator = {
       opacity = "1.0",
       scaleAmount = appIcon._dtdSettings.get_double('dash-icon-scale');
 
+    Animator.updateIconSize(appIcon, state);
     if (appIcon._state == "active") {
       opacity = "0.85";
     } else if (state == "hover") {
@@ -91,12 +105,16 @@ var Animator = {
     );
   },
 
+  /**
+   * renderFlat renders the icon state using the glow rendering algorithm
+   */
   _renderGlow: function(appIcon, state) {
     let opacity = "1.0",
       color1 = appIcon.colorScheme.lighter,
       color2 = appIcon.colorScheme.original,
       scaleAmount = appIcon._dtdSettings.get_double('dash-icon-scale');
 
+    Animator.updateIconSize(appIcon, state);
     if (appIcon._state == "active") {
       opacity = "1.0";
 
@@ -132,30 +150,27 @@ var Animator = {
    * and style
    */
   updateIconBackground: function(appIcon, state, style) {
-    let bgStyle = "flat";
-
-    Animator.updateIconSize(appIcon, state);
     if (!appIcon.colorScheme)
       return;
 
-    if (bgStyle === "flat") {
+    if (style === "flat") {
       Animator._renderFlat(appIcon, state);
-    } else if (bgStyle == "glow") {
+    } else if (style == "glow") {
       Animator._renderGlow(appIcon, state);
     }
 
-    let factor = DESATURATION_FACTOR.inactive;
+    let factor = AnimatorConst.desaturation.inactive;
     if (appIcon._state == "active") {
-      factor = DESATURATION_FACTOR.active;
+      factor = AnimatorConst.desaturation.active;
     } else if (state == "hover") {
-      factor = DESATURATION_FACTOR.hover;
+      factor = AnimatorConst.desaturation.hover;
     }
 
     if (appIcon._colorDesaturation) {
       Tweener.addTween(appIcon._colorDesaturation, {
         factor: factor,
-        time: 0.25,
-        transition: 'easeInExpo',
+        time: appIcon._animConfig.timing,
+        transition: appIcon._animConfig.easing,
       });
     } else {
       global.log("d2d: colorSaturation is not defined");
@@ -174,6 +189,7 @@ var Animator = {
       let scale = 1.0;
 
       Tweener.addTween(appIcon.icon.actor, {
+        // opacity: 200,
         translation_x: 0,
         translation_y: 0,
         scale_x: 1.0,
@@ -182,15 +198,23 @@ var Animator = {
         time: appIcon._animConfig.timing,
         transition: appIcon._animConfig.easing,
       });
-    } else if (state == "active") {
-      global.log('active...');
+
+      // Tweener.addTween(appIcon._iconContainer, {
+      //   translation_y: 90,
+      //   time: appIcon._animConfig.timing,
+      //   transition: appIcon._animConfig.easing
+      // });
+    } else if (state == "active" || appIcon._state == "active") {
       let scale = appIcon._dtdSettings.get_double('dash-icon-scale'),
         offset = 0;
 
-      offset = Animator._getIconScaleOffset(appIcon, scale);
+      if (state === "hover")
+        scale *= 1.05;
 
+      offset = Animator._getIconScaleOffset(appIcon, scale) / 2;
       Tweener.addTween(appIcon.icon.actor, {
-        translation_y: -offset * 0.75,
+        // opacity: 255,
+        translation_y: -offset * 0.25,
         scale_x: scale,
         scale_y: scale,
         time: appIcon._animConfig.timing,
@@ -211,6 +235,12 @@ var Animator = {
         time: appIcon._animConfig.timing,
         transition: appIcon._animConfig.easing,
       });
+
+      // Tweener.addTween(appIcon._iconContainer, {
+      //   translation_y: 0,
+      //   time: appIcon._animConfig.timing,
+      //   transition: appIcon._animConfig.easing
+      // });
     }
   }
 };
