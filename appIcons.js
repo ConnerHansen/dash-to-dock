@@ -129,6 +129,15 @@ var MyAppIcon = new Lang.Class({
 
         this.parent(app, iconParams);
         this._iconContainer.style_class = this._iconContainer.style_class + " dashtodockIcon";
+        this._iconContainer.move_anchor_point_from_gravity(Clutter.Gravity.CENTER);
+
+        // this._iconContainer.move_anchor_point(0, 60);
+        // this._iconContainer.anchor_gravity = Clutter.Gravity.WEST;
+        // this._iconContainer.anchor_x = this.actor.width;
+        // this._iconContainer.anchor_y = this.actor.height * 2; + 20;
+        // this.actor.anchor_gravity = Clutter.Gravity.NORTH_WEST;
+        // this.actor.set_anchor_point_from_gravity(Clutter.Gravity.SOUTH);
+        // this.actor.anchor_gravity = Clutter.Gravity.SOUTH;
 
         // Monitor windows-changes instead of app state.
         // Keep using the same Id and function callback (that is extended)
@@ -336,6 +345,11 @@ var MyAppIcon = new Lang.Class({
         windows.forEach(function(w) {
             w.set_icon_geometry(rect);
         });
+
+        this._iconContainer.scale_gravity = Clutter.Gravity.NORTH;
+        this._iconContainer.move_anchor_point_from_gravity(Clutter.Gravity.SOUTH_WEST);
+        this._iconContainer.translation_y = this._iconContainer.height;
+        this._iconContainer.translation_y_default = this._iconContainer.height;
     },
 
     _toggleAppIndicators: function() {
@@ -745,7 +759,7 @@ var MyAppIcon = new Lang.Class({
 
           Tweener.addTween(this.icon.actor, {
             translation_x: 0,
-            translation_y: 0,
+            // translation_y: 0,
             scale_x: 1.0,
             scale_y: 1.0,
             time: this._animConfig.timing,
@@ -763,7 +777,7 @@ var MyAppIcon = new Lang.Class({
 
         offset = ((this._originalSize * scale) - this._originalSize) / 2;
         Tweener.addTween(this.icon.actor, {
-          translation_y: -offset / 2,
+          // translation_y: -offset / 2,
           scale_x: scale,
           scale_y: scale,
           time: this._animConfig.timing,
@@ -782,7 +796,7 @@ var MyAppIcon = new Lang.Class({
         offset = ((this._originalSize * scale) - this._originalSize) / 2;
         Tweener.addTween(this.icon.actor, {
           // translation_x: -offset,
-          translation_y: -offset / 2,
+          // translation_y: -offset / 2,
           scale_x: scale,
           scale_y: scale,
           time: this._animConfig.timing,

@@ -2,6 +2,11 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkAdjustment" id="animation_offset_adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="animation_time_adjustment">
     <property name="upper">1</property>
     <property name="step_increment">0.050000000000000003</property>
@@ -2244,6 +2249,7 @@
                     <property name="name">qweqrw</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_bottom">15</property>
                     <property name="label_xalign">0</property>
                     <property name="shadow_type">in</property>
                     <child>
@@ -2334,6 +2340,81 @@
                             <child>
                               <object class="GtkListBoxRow">
                                 <property name="width_request">100</property>
+                                <property name="height_request">80</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <child>
+                                  <object class="GtkGrid" id="animation_offset_grid">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">12</property>
+                                    <property name="margin_bottom">12</property>
+                                    <property name="column_spacing">16</property>
+                                    <child>
+                                      <object class="GtkLabel" id="animation_offset_description">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="label" translatable="yes">Adjust the amount of offset in MS from one icon to another</property>
+                                        <property name="wrap">True</property>
+                                        <property name="width_chars">6</property>
+                                        <property name="max_width_chars">15</property>
+                                        <property name="xalign">0</property>
+                                        <style>
+                                          <class name="dim-label"/>
+                                        </style>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="animation_offset_label">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="xpad">0</property>
+                                        <property name="ypad">0</property>
+                                        <property name="label" translatable="yes">Icon animation offset</property>
+                                        <property name="xalign">0</property>
+                                        <property name="yalign">0.5</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkScale" id="animation_offset_scale">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="vexpand">True</property>
+                                        <property name="adjustment">animation_offset_adjustment</property>
+                                        <property name="show_fill_level">True</property>
+                                        <property name="restrict_to_fill_level">False</property>
+                                        <property name="fill_level">1</property>
+                                        <property name="round_digits">0</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">right</property>
+                                        <signal name="value-changed" handler="animation_offset_scale_value_changed_cb" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkListBoxRow">
+                                <property name="width_request">100</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <child>
@@ -2369,6 +2450,57 @@
                                           <item translatable="yes">Firm</item>
                                           <item translatable="yes">Snappy</item>
                                           <item translatable="yes">Soft</item>
+                                        </items>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="pack_type">end</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkListBoxRow">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="valign">start</property>
+                                    <property name="margin_left">12</property>
+                                    <property name="margin_right">12</property>
+                                    <property name="margin_top">12</property>
+                                    <property name="margin_bottom">12</property>
+                                    <property name="spacing">31</property>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Dock Hide Style</property>
+                                        <property name="width_chars">35</property>
+                                        <property name="xalign">0</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBoxText" id="dock_hide_combo">
+                                        <property name="width_request">160</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <items>
+                                          <item translatable="yes">Hide Icons</item>
+                                          <item translatable="yes">Disappear</item>
+                                          <item translatable="yes">Rolodex</item>
+                                          <item translatable="yes">Pop</item>
                                         </items>
                                       </object>
                                       <packing>

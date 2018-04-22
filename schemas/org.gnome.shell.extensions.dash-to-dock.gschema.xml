@@ -20,6 +20,12 @@
     <value value='2' nick='snappy'/>
     <value value='3' nick='soft'/>
   </enum>
+  <enum id='org.gnome.shell.extensions.dash-to-dock.hide-type'>
+    <value value='0' nick='hide_icons'/>
+    <value value='1' nick='disappear'/>
+    <value value='2' nick='rolodex'/>
+    <value value='3' nick='pop'/>
+  </enum>
   <!-- this is mean to Match StSide. LEFT and RIGHT actual position in reversed in
        rtl languages -->
   <enum id='org.gnome.shell.extensions.dash-to-dock.position'>
@@ -44,10 +50,20 @@
       <summary>Dock animation configuration</summary>
       <description>What style of animation should be used for the dock.</description>
     </key>
+    <key name="dock-hide-type" enum="org.gnome.shell.extensions.dash-to-dock.hide-type">
+      <default>'hide_icons'</default>
+      <summary>Dock animation hide type</summary>
+      <description>What style of animation should be used for hiding the dock icons.</description>
+    </key>
     <key type="d" name="animation-time">
       <default>0.2</default>
       <summary>Animation time</summary>
       <description>Sets the time duration of the autohide effect.</description>
+    </key>
+    <key type="d" name="animation-offset-time">
+      <default>2</default>
+      <summary>Animation offset time</summary>
+      <description>Sets the offset time duration of the autohide effect.</description>
     </key>
     <key type="d" name="show-delay">
       <default>0.25</default>

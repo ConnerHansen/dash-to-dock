@@ -2,7 +2,6 @@
 #dashtodockContainer.shrink #dash,
 #dashtodockContainer.dashtodock #dash {
     border:1px;
-    padding:0px;
 }
 
 #dashtodockContainer.shrink.left #dash,
@@ -93,6 +92,7 @@
 
 #dashtodockContainer.dashtodock #dash {
     background: #2e3436;
+    overflow: visible;
 }
 
 #dashtodockContainer .number-overlay {
@@ -109,7 +109,9 @@
 }
 
 #dashtodockContainer .dashtodockIcon {
-  /*margin: 3px;*/
+  /*margin: 1px;*/
+  /*margin-top: 5px;*/
+  /*padding: -2px;*/
   transition-duration: 200ms;
   background-gradient-direction: radial;
   border-radius: 120px;
@@ -124,6 +126,7 @@
 #dashtodockContainer .dashtodockIcon .overview-icon.whatwhat {
   /*border: 5px solid #fff;*/
   border-radius: 120px;
+  /*padding: 5px;*/
   /*background: none;*/
 }
 
@@ -159,6 +162,9 @@
   /*box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.1);*/
 }
 
+.app-well-app {
+  padding-top: 30px;
+}
 .app-well-app .overview-icon.whatwhat {
   /*background-color: rgba(255, 0, 255, 0.8);*/
   /*transition-duration: 0ms;*/

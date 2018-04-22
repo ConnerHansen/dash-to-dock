@@ -47,7 +47,7 @@ var Animator = {
     [rect.width, rect.height] = appIcon.actor.get_transformed_size();
     appIcon._originalSize = rect.width;
 
-    return ((appIcon._originalSize * scale) - appIcon._originalSize);
+    return Math.floor((appIcon._originalSize * scale) - appIcon._originalSize);
   },
 
   /**
@@ -76,7 +76,8 @@ var Animator = {
     }
 
     appIcon._iconContainer.set_style(
-        'margin-top: ' + scaleAmount * scaleAmount * 8 + 'px;' +
+        // 'margin-top: ' + scaleAmount * scaleAmount * 8 + 'px;' +
+        // 'margin-top: 5px;' +
         'margin-right: 5px;' +
         'background-gradient-direction: radial;' +
         'background-gradient-start: rgba(' + color1 + ', ' + opacity + ');' +
@@ -110,7 +111,8 @@ var Animator = {
     // TODO: fix this hack, it's stupid to guess at it like this. Scale based
     // on the selected icon size and maximum scale factor instead
     appIcon._iconContainer.set_style(
-        'margin-top: ' + scaleAmount * scaleAmount * 8 + 'px;' +
+        // 'margin-top: ' + scaleAmount * scaleAmount * 8 + 'px;' +
+        // 'margin-top: 5px;' +
         'margin-right: ' + scaleAmount * scaleAmount * scaleAmount + 'px;' +
         'border-radius: 20px;' +
         'background-gradient-direction: radial;' +
@@ -164,7 +166,7 @@ var Animator = {
    * updateIconSize updates the current size of the icon base on the state
    */
   updateIconSize: function(appIcon, state) {
-    appIcon.icon.actor.scale_gravity = Clutter.Gravity.SOUTH;
+    appIcon.icon.actor.scale_gravity = Clutter.Gravity.CENTER;
     if (!appIcon._animConfig)
       appIcon._animConfig = animConfigs["snappy"];
 
@@ -176,16 +178,19 @@ var Animator = {
         translation_y: 0,
         scale_x: 1.0,
         scale_y: 1.0,
+        rotation_angle_z: 0,
         time: appIcon._animConfig.timing,
         transition: appIcon._animConfig.easing,
       });
     } else if (state == "active") {
+      global.log('active...');
       let scale = appIcon._dtdSettings.get_double('dash-icon-scale'),
         offset = 0;
 
-      offset = Animator._getIconScaleOffset(appIcon, scale) / 2;
+      offset = Animator._getIconScaleOffset(appIcon, scale);
+
       Tweener.addTween(appIcon.icon.actor, {
-        translation_y: -offset / 2,
+        translation_y: -offset * 0.75,
         scale_x: scale,
         scale_y: scale,
         time: appIcon._animConfig.timing,
@@ -196,12 +201,13 @@ var Animator = {
         scale = 1 + (0.75 * (iconScale - 1)),
         offset = 0;
 
-      offset = Animator._getIconScaleOffset(appIcon, scale) / 2;
+      offset = Animator._getIconScaleOffset(appIcon, scale) * 0.5;
       Tweener.addTween(appIcon.icon.actor, {
         // translation_x: -offset,
-        translation_y: -offset / 2,
+        translation_y: -offset * 0.5,
         scale_x: scale,
         scale_y: scale,
+        rotation_angle_z: 360,
         time: appIcon._animConfig.timing,
         transition: appIcon._animConfig.easing,
       });

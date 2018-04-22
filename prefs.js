@@ -98,7 +98,6 @@ const Settings = new Lang.Class({
     },
 
     _bindSettings: function() {
-      global.log("**** BIND SETTINGS!");
         // Position and size panel
 
         // Monitor options
@@ -261,7 +260,7 @@ const Settings = new Lang.Class({
                 if (id == 1) {
                     // restore default settings for the relevant keys
                     let keys = ['intellihide', 'autohide', 'intellihide-mode', 'autohide-in-fullscreen', 'require-pressure-to-show',
-                                'animation-time', 'show-delay', 'hide-delay', 'pressure-threshold'];
+                                'animation-time', 'show-delay', 'hide-delay', 'pressure-threshold', 'dock-hide-type'];
                     keys.forEach(function(val) {
                         this._settings.set_value(val, this._settings.get_default_value(val));
                     }, this);
@@ -277,8 +276,6 @@ const Settings = new Lang.Class({
             dialog.show_all();
 
         }));
-
-        global.log("* * * *A*SD*AS* DA*S DA*SD *AS D*");
 
         // size options
         this._builder.get_object('dock_size_scale').set_value(this._settings.get_double('height-fraction'));
@@ -592,10 +589,16 @@ const Settings = new Lang.Class({
 
         // Setup my new settings. This method needs to be broken up because it's impossible to find freaking anything
         this._builder.get_object('custom_icon_scale').set_value(this._settings.get_double('dash-icon-scale'));
+        this._builder.get_object('animation_offset_scale').set_value(this._settings.get_double('animation-offset-time'));
 
         this._builder.get_object('animation_type_combo').set_active(this._settings.get_enum('dock-animation-type'));
         this._builder.get_object('animation_type_combo').connect('changed', Lang.bind (this, function(widget) {
             this._settings.set_enum('dock-animation-type', widget.get_active());
+        }));
+
+        this._builder.get_object('dock_hide_combo').set_active(this._settings.get_enum('dock-hide-type'));
+        this._builder.get_object('dock_hide_combo').connect('changed', Lang.bind (this, function(widget) {
+            this._settings.set_enum('dock-hide-type', widget.get_active());
         }));
 
         this._settings.bind('unity-backlit-items',
@@ -702,6 +705,10 @@ const Settings = new Lang.Class({
                 this.dash_icon_scale = scale.get_value();
                 return GLib.SOURCE_REMOVE;
             }));
+        },
+
+        animation_offset_scale_value_changed_cb: function(scale) {
+                this._settings.set_double('animation-offset-time', scale.get_value());
         },
 
         all_windows_radio_button_toggled_cb: function(button) {

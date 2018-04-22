@@ -45,6 +45,36 @@ const scrollAction = {
     SWITCH_WORKSPACE: 2
 };
 
+const animConfigs = {
+  bouncy: {
+    ease_in: "easeOutElastic",
+    ease_out: "easeOutElastic",
+    timing: 1.6
+  },
+  firm: {
+    ease_in: "easeOutBounce",
+    ease_out: "easeOutBounce",
+    timing: 0.3
+  },
+  snappy: {
+    ease_in: "easeOutQuint",
+    ease_out: "easeOutQuint",
+    timing: 0.2
+  },
+  soft: {
+    ease_in: "easeOutBack",
+    ease_out: "easeOutBack",
+    timing: 0.4
+  }
+};
+
+const DOCK_HIDE_TYPE = {
+  HIDE_ICONS: 0,
+  DISAPPEAR: 1,
+  ROLODEX: 2,
+  POP: 3
+};
+
 /**
  * A simple St.Widget with one child whose allocation takes into account the
  * slide out of its child via the _slidex parameter ([0:1]).
@@ -93,6 +123,7 @@ const DashSlideContainer = new Lang.Class({
         this._child = null;
 
         // slide parameter: 1 = visible, 0 = hidden.
+        this._animationDirection = null;
         this._slidex = localParams.initialSlideValue;
         this._side = localParams.side;
         this._slideoutSize = 0; // minimum size when slided out
@@ -736,22 +767,151 @@ const DockedDash = new Lang.Class({
         //   transition: 'easeInOutExpo'
         // });
 
-        Tweener.addTween(this._slider, {
-            slidex: 1,
-            time: time,
-            delay: delay,
-            transition: 'easeInOutExpo',
-            onComplete: Lang.bind(this, function() {
-                this._dockState = State.SHOWN;
-                // Remove barrier so that mouse pointer is released and can access monitors on other side of dock
-                // NOTE: Delay needed to keep mouse from moving past dock and re-hiding dock immediately. This
-                // gives users an opportunity to hover over the dock
-                if (this._removeBarrierTimeoutId > 0)
-                    Mainloop.source_remove(this._removeBarrierTimeoutId);
-                this._removeBarrierTimeoutId = Mainloop.timeout_add(100, Lang.bind(this, this._removeBarrier));
-            })
-        });
+        switch (this._settings.get_enum('dock-hide-type')) {
+            case DOCK_HIDE_TYPE.HIDE_ICONS:
+              this._animateInHideIcons(time, delay);
+              break;
+
+            case DOCK_HIDE_TYPE.DISAPPEAR:
+              this._animateInDisappear(time, delay);
+              break;
+
+            case DOCK_HIDE_TYPE.ROLODEX:
+              this._animateInRolodex(time, delay);
+              break;
+
+            case DOCK_HIDE_TYPE.POP:
+              this._animateInHideIcons(time, delay);
+              break;
+
+            default:
+              this._animateInDefault(time, delay);
+              break;
+        }
     },
+
+    _animateInDefault: function(time, delay) {
+      Tweener.addTween(this._slider, {
+          slidex: 1,
+          time: time,
+          delay: delay,
+          transition: this._getEasing().ease_in,
+          onComplete: Lang.bind(this, function() {
+              this._dockState = State.SHOWN;
+              // Remove barrier so that mouse pointer is released and can access monitors on other side of dock
+              // NOTE: Delay needed to keep mouse from moving past dock and re-hiding dock immediately. This
+              // gives users an opportunity to hover over the dock
+              if (this._removeBarrierTimeoutId > 0)
+                  Mainloop.source_remove(this._removeBarrierTimeoutId);
+              this._removeBarrierTimeoutId = Mainloop.timeout_add(100, Lang.bind(this, this._removeBarrier));
+          })
+      });
+    },
+
+    _animateInDisappear: function(time, delay) {
+      this._animateInPatch();
+
+      let offset = 0;
+      const appIcons = this.dash._getAppIcons();
+      for (const appIcon of appIcons) {
+        // appIcon.actor.scale_x = 0.5;
+        // appIcon.actor.scale_y = 0.5;
+        Tweener.addTween(appIcon._iconContainer, {
+          scale_x: 1,
+          scale_y: 1,
+          opacity: 255,
+          time: time,
+          delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+          // delay: delay,
+          transition: this._getEasing().ease_out
+        });
+
+        offset++;
+      }
+
+      Tweener.addTween(this.dash._showAppsIcon.icon.actor, {
+        scale_x: 1,
+        scale_y: 1,
+        opacity: 255,
+        time: time,
+        delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+        // delay: delay,
+        transition: this._getEasing().ease_out
+      });
+    },
+
+    _animateInRolodex: function(time, delay) {
+      this._animateInPatch();
+
+      let offset = 0;
+      const appIcons = this.dash._getAppIcons();
+      for (const appIcon of appIcons) {
+        // appIcon.actor.scale_x = 0.5;
+        // appIcon.actor.scale_y = 0.5;
+        Tweener.addTween(appIcon._iconContainer, {
+          rotation_angle_x: 0,
+          translation_y: appIcon._iconContainer.translation_y_default,
+          time: time,
+          delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+          // delay: delay,
+          transition: this._getEasing().ease_out
+        });
+
+        offset++;
+      }
+
+      Tweener.addTween(this.dash._showAppsIcon.icon.actor, {
+        rotation_angle_x: 0,
+        translation_y: 0,
+        time: time,
+        delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+        // delay: delay,
+        transition: this._getEasing().ease_out
+      });
+    },
+
+    _animateInPatch: function() {
+      Tweener.addTween(this._slider, {
+          slidex: 1,
+          time: 0,
+          // delay: delay,
+          // transition: this._getEasing().ease_in,
+          onComplete: Lang.bind(this, function() {
+              this._dockState = State.SHOWN;
+              // Remove barrier so that mouse pointer is released and can access monitors on other side of dock
+              // NOTE: Delay needed to keep mouse from moving past dock and re-hiding dock immediately. This
+              // gives users an opportunity to hover over the dock
+              if (this._removeBarrierTimeoutId > 0)
+                  Mainloop.source_remove(this._removeBarrierTimeoutId);
+              this._removeBarrierTimeoutId = Mainloop.timeout_add(100, Lang.bind(this, this._removeBarrier));
+          })
+      });
+    },
+
+    _animateInHideIcons: function(time, delay) {
+      this._animateInPatch();
+
+      let offset = 0;
+      const appIcons = this.dash._getAppIcons();
+      for (const appIcon of appIcons) {
+        Tweener.addTween(appIcon.actor, {
+          translation_y: 0,
+          time: time,
+          delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+          transition: this._getEasing().ease_in,
+        });
+
+        offset++;
+      }
+
+      Tweener.addTween(this.dash._showAppsIcon.icon.actor, {
+        translation_y: 0,
+        time: time,
+        delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+        transition: this._getEasing().ease_in,
+      });
+    },
+
 
     _animateOut: function(time, delay) {
         this._dockState = State.HIDING;
@@ -761,18 +921,145 @@ const DockedDash = new Lang.Class({
         //   time: time,
         //   delay: delay,
         //   transition: 'easeInExpo'
-        // });
+        // });]]
+        switch (this._settings.get_enum('dock-hide-type')) {
+            case DOCK_HIDE_TYPE.HIDE_ICONS:
+              this._animateOutHideIcons(time, delay);
+              break;
 
-        Tweener.addTween(this._slider, {
-            slidex: 0,
-            time: time,
-            delay: delay ,
-            transition: 'easeInExpo',
-            onComplete: Lang.bind(this, function() {
-                this._dockState = State.HIDDEN;
-                this._updateBarrier();
-            })
+            case DOCK_HIDE_TYPE.DISAPPEAR:
+              this._animateOutDisappear(time, delay);
+              break;
+
+            case DOCK_HIDE_TYPE.ROLODEX:
+              this._animateOutRolodex(time, delay);
+              break;
+
+            case DOCK_HIDE_TYPE.POP:
+              this._animateOutHideIcons(time, delay);
+              break;
+
+            default:
+              this._animateOutDefault(time, delay);
+              break;
+        }
+    },
+
+    _animateOutDefault: function(time, delay) {
+      Tweener.addTween(this._slider, {
+          slidex: 0,
+          time: time,
+          delay: delay + time ,
+          transition: animConfigs.bouncy.ease_out,
+          onComplete: Lang.bind(this, function() {
+              this._dockState = State.HIDDEN;
+              this._updateBarrier();
+          })
+      });
+    },
+
+    _animateOutComplete: function(time) {
+      return function() {
+          // Make sure we didn't get interrupted before hiding the panel
+          if (this._dockState == State.HIDING) {
+            Tweener.addTween(this._slider, {
+                slidex: 0,
+                time: time,
+                onComplete: Lang.bind(this, function() {
+                    this._dockState = State.HIDDEN;
+                    this._updateBarrier();
+                })
+            });
+          }
+      };
+    },
+
+    _animateOutDisappear: function(time, delay) {
+      let offset = 0;
+      const appIcons = this.dash._getAppIcons();
+      global.log(Object.keys(appIcons[0]));
+      for (const appIcon of appIcons) {
+        appIcon._iconContainer.scale_gravity = Clutter.Gravity.NORTH;
+        Tweener.addTween(appIcon._iconContainer, {
+          scale_x: 0,
+          scale_y: 0,
+          opacity: 0,
+          time: time,
+          delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+          transition: this._getEasing().ease_out
         });
+
+        offset++;
+      }
+
+      this.dash._showAppsIcon.icon.actor.scale_gravity = Clutter.Gravity.SOUTH;
+      Tweener.addTween(this.dash._showAppsIcon.icon.actor, {
+        scale_x: 0,
+        scale_y: 0,
+        opacity: 0,
+        time: time,
+        delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+        // delay: delay,
+        transition: this._getEasing().ease_out,
+        onComplete: Lang.bind(this, this._animateOutComplete(0))
+      });
+    },
+
+    _animateOutHideIcons: function(time, delay) {
+        let offset = 0;
+        const appIcons = this.dash._getAppIcons();
+        for (const appIcon of appIcons) {
+          Tweener.addTween(appIcon.actor, {
+            translation_y: this._settings.get_int('dash-max-icon-size') * 6,
+            time: time,
+            delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+            transition: this._getEasing().ease_out
+          });
+
+          offset++;
+        }
+
+        Tweener.addTween(this.dash._showAppsIcon.icon.actor, {
+          translation_y: this._settings.get_int('dash-max-icon-size') * 6,
+          time: time,
+          delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+          transition: this._getEasing().ease_out,
+          onComplete: Lang.bind(this, this._animateOutComplete(0))
+        });
+    },
+
+    _animateOutRolodex: function(time, delay) {
+      let offset = 0;
+      const appIcons = this.dash._getAppIcons();
+      // global.log(Object.keys(appIcons[0].prototype));
+      for (const appIcon of appIcons) {
+        // appIcon.actor.set_gravity(Clutter.Gravity.SOUTH);
+        // appIcon.actor.move_anchor_point_from_gravity(Clutter.Gravity.SOUTH_EAST);
+        Tweener.addTween(appIcon._iconContainer, {
+          rotation_angle_x: -180,
+          translation_y: appIcon._iconContainer.translation_y_default + 20,
+          time: time,
+          delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+          // delay: delay,
+          transition: this._getEasing().ease_out
+        });
+
+        offset++;
+      }
+
+      Tweener.addTween(this.dash._showAppsIcon.icon.actor, {
+        rotation_angle_x: -180,
+        time: time,
+        translation_y: this.dash._showAppsIcon.icon.actor.height + 20,
+        delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
+        // delay: delay,
+        transition: this._getEasing().ease_out,
+        onComplete: Lang.bind(this, this._animateOutComplete(0))
+      });
+    },
+
+    _getEasing: function() {
+      return animConfigs[this._settings.get_string('dock-animation-type').toLowerCase()];
     },
 
     /**

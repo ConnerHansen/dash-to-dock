@@ -231,6 +231,7 @@ var MyDash = new Lang.Class({
         this._showAppsIcon.childScale = 1;
         this._showAppsIcon.childOpacity = 255;
         this._showAppsIcon.icon.setIconSize(this.iconSize);
+        this._showAppsIcon.icon.actor.scale_gravity = Clutter.Gravity.CENTER;
         this._hookUpLabel(this._showAppsIcon);
 
         this.showAppsButton = this._showAppsIcon.toggleButton;
