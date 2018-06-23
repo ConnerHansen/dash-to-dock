@@ -124,8 +124,13 @@ var MyAppIcon = new Lang.Class({
         this._nWindows = 0;
 
         this.parent(app, iconParams);
+
+        // this.icon.actor.scale_gravity = Clutter.Gravity.CENTER;
+        this.icon.actor.set_pivot_point(0.5, 0.5);
+
         this._iconContainer.style_class = this._iconContainer.style_class + " dashtodockIcon";
-        this._iconContainer.move_anchor_point_from_gravity(Clutter.Gravity.CENTER);
+        // this.icon.actor.move_anchor_point_from_gravity(Clutter.Gravity.CENTER);
+        this._iconContainer.set_pivot_point(0.5, 0.5);
 
         // this._iconContainer.move_anchor_point(0, 60);
         // this._iconContainer.anchor_gravity = Clutter.Gravity.WEST;
@@ -360,10 +365,10 @@ var MyAppIcon = new Lang.Class({
             w.set_icon_geometry(rect);
         });
 
-        this._iconContainer.scale_gravity = Clutter.Gravity.NORTH;
-        this._iconContainer.move_anchor_point_from_gravity(Clutter.Gravity.SOUTH_WEST);
-        this._iconContainer.translation_y = this._iconContainer.height;
-        this._iconContainer.translation_y_default = this._iconContainer.height;
+        // this._iconContainer.scale_gravity = Clutter.Gravity.NORTH;
+        // this._iconContainer.move_anchor_point_from_gravity(Clutter.Gravity.SOUTH_WEST);
+        // this._iconContainer.translation_y = this._iconContainer.height;
+        // this._iconContainer.translation_y_default = this._iconContainer.height;
     },
 
     _toggleAppIndicators: function() {
@@ -758,7 +763,7 @@ var MyAppIcon = new Lang.Class({
     },
 
     _updateIconSize: function(state) {
-      this.icon.actor.scale_gravity = Clutter.Gravity.SOUTH;
+      // this.icon.actor.scale_gravity = Clutter.Gravity.SOUTH;
       if (!this._animConfig)
         this._animConfig = animConfigs["snappy"];
 
@@ -842,6 +847,7 @@ var MyAppIcon = new Lang.Class({
       this.colorScheme = {
         lighter: colorPallete.lighter.r + "," + colorPallete.lighter.g + "," + colorPallete.lighter.b,
         original: colorPallete.original.r + "," + colorPallete.original.g + "," + colorPallete.original.b,
+        dim: colorPallete.dim.r + "," + colorPallete.dim.g + "," + colorPallete.dim.b,
         darker: colorPallete.darker.r + "," + colorPallete.darker.g + "," + colorPallete.darker.b
       };
     },
@@ -991,6 +997,7 @@ var MyAppIcon = new Lang.Class({
         let backgroundColor = {
             lighter:  Utils.ColorUtils.ColorLuminanceRGB(rgb.r, rgb.g, rgb.b, 0.2),
             original: Utils.ColorUtils.ColorLuminanceRGB(rgb.r, rgb.g, rgb.b, -0.2),
+            dim: Utils.ColorUtils.ColorLuminanceRGB(rgb.r, rgb.g, rgb.b, -0.35),
             darker:   Utils.ColorUtils.ColorLuminanceRGB(rgb.r, rgb.g, rgb.b, -0.5)
         };
         // let backgroundColor = {

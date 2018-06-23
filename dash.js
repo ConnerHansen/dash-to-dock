@@ -71,7 +71,7 @@ const MyDashActor = new Lang.Class({
         this.actor = new Shell.GenericContainer({
             name: 'dash',
             layout_manager: layout,
-            clip_to_allocation: true
+            clip_to_allocation: false
         });
         this.actor.connect('get-preferred-width', Lang.bind(this, this._getPreferredWidth));
         this.actor.connect('get-preferred-height', Lang.bind(this, this._getPreferredHeight));
@@ -231,7 +231,8 @@ var MyDash = new Lang.Class({
         this._showAppsIcon.childScale = 1;
         this._showAppsIcon.childOpacity = 255;
         this._showAppsIcon.icon.setIconSize(this.iconSize);
-        this._showAppsIcon.icon.actor.scale_gravity = Clutter.Gravity.CENTER;
+        // this._showAppsIcon.icon.actor.scale_gravity = Clutter.Gravity.CENTER;
+        this._showAppsIcon.icon.actor.set_pivot_point(0.5, 0.5);
         this._hookUpLabel(this._showAppsIcon);
 
         this.showAppsButton = this._showAppsIcon.toggleButton;

@@ -54,13 +54,14 @@ var Animator = {
    * the requested transformed size
    */
   _getIconScaleOffset: function(appIcon, scale) {
-    let rect = new Meta.Rectangle();
-
-    [rect.x, rect.y] = appIcon.actor.get_transformed_position();
-    [rect.width, rect.height] = appIcon.actor.get_transformed_size();
-    appIcon._originalSize = rect.width;
-
-    return Math.floor((appIcon._originalSize * scale) - appIcon._originalSize);
+    // let rect = new Meta.Rectangle();
+    //
+    // [rect.x, rect.y] = appIcon.actor.get_transformed_position();
+    // [rect.width, rect.height] = appIcon.actor.get_transformed_size();
+    // appIcon._originalSize = rect.width;
+    //
+    // return Math.floor((appIcon._originalSize * scale) - appIcon._originalSize);
+    return 30 * (scale - 1.0);
   },
 
   /**
@@ -82,17 +83,25 @@ var Animator = {
     }
 
     if (state == "hover") {
-      color1 = appIcon.colorScheme.darker;
-      color2 = appIcon.colorScheme.darker;
+      if (appIcon._state == "active") {
+        color1 = appIcon.colorScheme.original;
+        color2 = appIcon.colorScheme.lighter;
+      } else {
+        color1 = appIcon.colorScheme.original;
+        color2 = appIcon.colorScheme.original;
+      }
     } else if (state == "active") {
-      color1 = appIcon.colorScheme.darker;
-      color2 = appIcon.colorScheme.original;
+      color1 = appIcon.colorScheme.dim;
+      color2 = appIcon.colorScheme.lighter;
     }
 
     appIcon._iconContainer.set_style(
         // 'margin-top: ' + scaleAmount * scaleAmount * 8 + 'px;' +
-        // 'margin-top: 5px;' +
+        // 'margin-top: 15px;' +
+        `margin-top: ${scaleAmount * 10}px;` +
         'margin-right: 5px;' +
+        'border: 1px solid rgba(' + color1 + ', 0.5);' +
+        // 'box-shadow: inset 10px 10px 10px rgba(0, 0, 0, 0.2);' +
         'background-gradient-direction: radial;' +
         'background-gradient-start: rgba(' + color1 + ', ' + opacity + ');' +
         'background-gradient-end: rgba(' + color2 + ', ' + opacity + ');'
@@ -181,7 +190,7 @@ var Animator = {
    * updateIconSize updates the current size of the icon base on the state
    */
   updateIconSize: function(appIcon, state) {
-    appIcon.icon.actor.scale_gravity = Clutter.Gravity.CENTER;
+    // appIcon.icon.actor.scale_gravity = Clutter.Gravity.CENTER;
     if (!appIcon._animConfig)
       appIcon._animConfig = animConfigs["snappy"];
 
@@ -194,7 +203,7 @@ var Animator = {
         translation_y: 0,
         scale_x: 1.0,
         scale_y: 1.0,
-        rotation_angle_z: 0,
+        // rotation_angle_z: 0,
         time: appIcon._animConfig.timing,
         transition: appIcon._animConfig.easing,
       });
@@ -211,10 +220,11 @@ var Animator = {
       if (state === "hover")
         scale *= 1.05;
 
-      offset = Animator._getIconScaleOffset(appIcon, scale) / 2;
+      offset = Animator._getIconScaleOffset(appIcon, scale);
       Tweener.addTween(appIcon.icon.actor, {
         // opacity: 255,
-        translation_y: -offset * 0.25,
+        // translation_x: offset,
+        translation_y: -offset,
         scale_x: scale,
         scale_y: scale,
         time: appIcon._animConfig.timing,
@@ -225,13 +235,14 @@ var Animator = {
         scale = 1 + (0.75 * (iconScale - 1)),
         offset = 0;
 
-      offset = Animator._getIconScaleOffset(appIcon, scale) * 0.5;
+      offset = Animator._getIconScaleOffset(appIcon, scale);
+      // appIcon.icon.actor.rotation_angle_z = 20;
       Tweener.addTween(appIcon.icon.actor, {
-        // translation_x: -offset,
+        // translation_x: offset,
         translation_y: -offset * 0.5,
         scale_x: scale,
         scale_y: scale,
-        rotation_angle_z: 360,
+        // rotation_angle_z: 0,
         time: appIcon._animConfig.timing,
         transition: appIcon._animConfig.easing,
       });

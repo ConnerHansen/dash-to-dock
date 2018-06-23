@@ -843,15 +843,6 @@ const DockedDash = new Lang.Class({
     _animateIn: function(time, delay) {
         this._dockState = State.SHOWING;
 
-        // Tweener.addTween(this.actor, {
-        //   opacity: 255,
-        //   time: time,
-        //   delay: delay,
-        //   transition: 'easeInOutExpo'
-        // });
-        this._animateInExperimental(time, delay);
-    },
-
         switch (this._settings.get_enum('dock-hide-type')) {
             case DOCK_HIDE_TYPE.HIDE_ICONS:
               this._animateInHideIcons(time, delay);
@@ -1064,7 +1055,8 @@ const DockedDash = new Lang.Class({
       const appIcons = this.dash._getAppIcons();
       global.log(Object.keys(appIcons[0]));
       for (const appIcon of appIcons) {
-        appIcon._iconContainer.scale_gravity = Clutter.Gravity.NORTH;
+        appIcon._iconContainer.set_pivot_point(0.5, 0.5);
+        // appIcon._iconContainer.scale_gravity = Clutter.Gravity.NORTH;
         Tweener.addTween(appIcon._iconContainer, {
           scale_x: 0,
           scale_y: 0,
@@ -1077,7 +1069,7 @@ const DockedDash = new Lang.Class({
         offset++;
       }
 
-      this.dash._showAppsIcon.icon.actor.scale_gravity = Clutter.Gravity.SOUTH;
+      // this.dash._showAppsIcon.icon.actor.scale_gravity = Clutter.Gravity.SOUTH;
       Tweener.addTween(this.dash._showAppsIcon.icon.actor, {
         scale_x: 0,
         scale_y: 0,
@@ -1094,6 +1086,7 @@ const DockedDash = new Lang.Class({
         let offset = 0;
         const appIcons = this.dash._getAppIcons();
         for (const appIcon of appIcons) {
+          appIcon._iconContainer.set_pivot_point(0.5, 0.5);
           Tweener.addTween(appIcon.actor, {
             translation_y: this._settings.get_int('dash-max-icon-size') * 6,
             time: time,
@@ -1118,11 +1111,12 @@ const DockedDash = new Lang.Class({
       const appIcons = this.dash._getAppIcons();
       // global.log(Object.keys(appIcons[0].prototype));
       for (const appIcon of appIcons) {
+        appIcon._iconContainer.set_pivot_point(0.5, 1.3);
         // appIcon.actor.set_gravity(Clutter.Gravity.SOUTH);
         // appIcon.actor.move_anchor_point_from_gravity(Clutter.Gravity.SOUTH_EAST);
         Tweener.addTween(appIcon._iconContainer, {
           rotation_angle_x: -180,
-          translation_y: appIcon._iconContainer.translation_y_default + 20,
+          // translation_y: appIcon._iconContainer.translation_y_default - 100,
           time: time,
           delay: delay + (offset * this._settings.get_double('animation-offset-time') / 1000),
           // delay: delay,

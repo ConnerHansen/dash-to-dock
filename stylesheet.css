@@ -35,6 +35,10 @@
     border-radius: 0px;
 }
 
+#dashtodockContainer .bottom #dash {
+  margin-top: 30px;
+}
+
 /* Scrollview style */
 .bottom #dashtodockDashScrollview,
 .top #dashtodockDashScrollview {
@@ -112,7 +116,7 @@
   /*margin: 1px;*/
   /*margin-top: 5px;*/
   /*padding: -2px;*/
-  transition-duration: 200ms;
+  /*transition-duration: 200ms;*/
   background-gradient-direction: radial;
   border-radius: 120px;
   background-gradient-start: rgba(255, 255, 255, 0.2);
@@ -123,10 +127,19 @@
   background: transparent;
 }
 
-#dashtodockContainer .dashtodockIcon .overview-icon.whatwhat {
+#dashtodockContainer .overview-icon {
+  /*border: 5px solid #fff;*/
+  /*border-radius: 120px;*/
+  padding: 7px;
+  /*margin-bottom: 2px;*/
+  /*background: none;*/
+}
+
+#dashtodockContainer .dashtodockIcon .overview-icon {
   /*border: 5px solid #fff;*/
   border-radius: 120px;
-  /*padding: 5px;*/
+  padding: 7px;
+  margin-bottom: 0;
   /*background: none;*/
 }
 
@@ -163,7 +176,7 @@
 }
 
 .app-well-app {
-  padding-top: 30px;
+  padding-top: 5px;
 }
 .app-well-app .overview-icon.whatwhat {
   /*background-color: rgba(255, 0, 255, 0.8);*/
